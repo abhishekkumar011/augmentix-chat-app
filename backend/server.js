@@ -1,8 +1,11 @@
-import express from "express";
+import { app } from "./app.js";
+import dotenv from "dotenv";
 
-const app = express();
+dotenv.config({
+  path: "./.env",
+});
 
-const port = 8000;
+const port = process.env.PORT || 8000;
 
 app.get("/", (req, res) => {
   res.send("API is running");
