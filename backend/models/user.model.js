@@ -23,7 +23,6 @@ const userSchema = new Schema(
         public_id: String,
         url: String,
       },
-      required: true,
       default:
         "https://icon-library.com/images/anonymous-avatar-icon/anonymous-avatar-icon-25.jpg",
     },
