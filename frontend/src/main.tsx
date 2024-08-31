@@ -1,8 +1,8 @@
 import "./index.css";
 import App from "./App.tsx";
 import { StrictMode } from "react";
-import { Login } from "./pages/index.ts";
 import { createRoot } from "react-dom/client";
+import { Login, Signup } from "./pages/index.ts";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 
 const router = createBrowserRouter([
@@ -17,6 +17,10 @@ const router = createBrowserRouter([
       {
         path: "/login",
         element: <Login />,
+      },
+      {
+        path: "/signup",
+        element: <Signup />,
       },
     ],
   },
