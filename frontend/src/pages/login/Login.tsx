@@ -1,4 +1,3 @@
-import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -7,15 +6,20 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import axios from "axios";
 import { useState } from "react";
 import logo from "@/assets/logo.png";
 import { Link } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 const Login = () => {
+  const { toast } = useToast();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setEmail(e.target.value);
@@ -23,6 +27,46 @@ const Login = () => {
 
   const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setPassword(e.target.value);
+  };
+
+  const handleLogin = async () => {
+    try {
+      setLoading(true);
+
+      toast({ description: "Loging in, please wait..." });
+
+      const response = await axios.post(
+        "/api/v1/users/login",
+        {
+          email,
+          password,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (response) {
+        toast({
+          title: "Login successful",
+          description: "You successfully logged in",
+          duration: 5000,
+        });
+      }
+
+      setEmail("");
+      setPassword("");
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.response?.data?.message || error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -43,7 +87,12 @@ const Login = () => {
               <Label htmlFor="email" className="font-semibold">
                 Email :
               </Label>
-              <Input id="email" type="email" onChange={handleEmailChange} />
+              <Input
+                id="email"
+                type="email"
+                onChange={handleEmailChange}
+                value={email}
+              />
             </div>
           </div>
           <div className="grid w-full items-center gap-4 my-4">
@@ -55,12 +104,15 @@ const Login = () => {
                 id="password"
                 type="password"
                 onChange={handlePasswordChange}
+                value={password}
               />
             </div>
           </div>
         </CardContent>
         <CardFooter className="flex items-start flex-col gap-4">
-          <Button className="w-full">Login</Button>
+          <Button className="w-full" onClick={handleLogin} disabled={loading}>
+            {loading ? "Loggin In" : "Login"}
+          </Button>
           <div className="flex gap-2">
             <span className="font-semibold">Create an account?</span>
             <Link to={"/signup"}>Signup</Link>
