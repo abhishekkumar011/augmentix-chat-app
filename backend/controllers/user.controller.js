@@ -112,4 +112,25 @@ const loginUser = asyncHandler(async (req, res) => {
     );
 });
 
-export { registerUser, loginUser };
+const getAllUser = asyncHandler(async (req, res) => {
+  const searchUser = req.query.search;
+
+  const query = {
+    $or: [
+      { fullName: { $regex: searchUser, $options: "i" } },
+      { email: { $regex: searchUser, $options: "i" } },
+    ],
+  };
+
+  const user = await User.find(query)
+    .find({ _id: { $ne: req.user?._id } })
+    .select("-password -refreshToken");
+
+  if (!user.length > 0) {
+    throw new ApiError(500, "No user found");
+  }
+
+  return res.status(201).json(new ApiResponse(200, user, "All user found"));
+});
+
+export { registerUser, loginUser, getAllUser };
