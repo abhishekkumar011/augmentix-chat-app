@@ -144,6 +144,16 @@ const renameGroupChatName = asyncHandler(async (req, res) => {
     throw new ApiError(400, "All fields are required");
   }
 
+  const checkGroupChat = await Chat.findById(chatId);
+
+  if (!(checkGroupChat || checkGroupChat.isGroupChat)) {
+    throw new ApiError(400, "This is not a groupChat");
+  }
+
+  if (checkGroupChat.groupAdmin.toString() !== req.user?._id.toString()) {
+    throw new ApiError(404, "Only group admin can change the group name");
+  }
+
   const updatedChat = await Chat.findByIdAndUpdate(
     chatId,
     {
@@ -167,4 +177,62 @@ const renameGroupChatName = asyncHandler(async (req, res) => {
     );
 });
 
-export { getOrCreateChat, getUserChats, createGroupChat, renameGroupChatName };
+const addUserToGroup = asyncHandler(async (req, res) => {
+  const { userId, chatId } = req.body;
+
+  if ([userId, chatId].some((field) => field?.trim() === "")) {
+    throw new ApiError(400, "All fields are required");
+  }
+
+  const userValid = await User.findById(userId);
+
+  if (!userValid) {
+    throw new ApiError(400, "user does not exist");
+  }
+
+  const checkGroupChat = await Chat.findById(chatId);
+
+  if (!(checkGroupChat || checkGroupChat.isGroupChat)) {
+    throw new ApiError(400, "This is not a groupChat");
+  }
+
+  if (checkGroupChat.groupAdmin.toString() !== req.user?._id.toString()) {
+    throw new ApiError(404, "Only group admin can add the user");
+  }
+
+  const isUserAlreadyInGroup = checkGroupChat.users.some(
+    (user) => user._id.toString() === userId
+  );
+
+  if (isUserAlreadyInGroup) {
+    throw new ApiError(400, "User is already in the group");
+  }
+
+  const addUser = await Chat.findByIdAndUpdate(
+    chatId,
+    {
+      $push: { users: userId },
+    },
+    { new: true }
+  )
+    .populate("users", "-passwrod -refreshToken")
+    .populate("groupAdmin", "-password -refreshToken");
+
+  if (!addUser) {
+    throw new ApiError(500, "Something went wrong while adding the user");
+  }
+
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(200, addUser, "User added to the group successfully")
+    );
+});
+
+export {
+  getOrCreateChat,
+  getUserChats,
+  createGroupChat,
+  renameGroupChatName,
+  addUserToGroup,
+};
