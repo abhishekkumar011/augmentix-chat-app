@@ -64,6 +64,7 @@ const Signup = () => {
       });
 
       if (response) {
+        localStorage.setItem("userData", JSON.stringify(response.data));
         toast({
           title: "Signup successful",
           description: "You successfully create an account",

@@ -9,7 +9,7 @@ import {
 import axios from "axios";
 import { useState } from "react";
 import logo from "@/assets/logo.png";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -20,6 +20,7 @@ const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setEmail(e.target.value);
@@ -49,11 +50,13 @@ const Login = () => {
       );
 
       if (response) {
+        localStorage.setItem("userData", JSON.stringify(response.data));
         toast({
           title: "Login successful",
           description: "You successfully logged in",
           duration: 5000,
         });
+        navigate("/chat")
       }
 
       setEmail("");
