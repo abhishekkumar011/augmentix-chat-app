@@ -1,8 +1,8 @@
-import { asyncHandler } from "../utils/asyncHandler.js";
-import { ApiError } from "../utils/ApiError.js";
 import { User } from "../models/user.model.js";
 import { Chat } from "../models/chat.model.js";
+import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
+import { asyncHandler } from "../utils/asyncHandler.js";
 
 //One on one chat
 const getOrCreateChat = asyncHandler(async (req, res) => {
@@ -66,4 +66,29 @@ const getOrCreateChat = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, createdChat, "chat created successfully"));
 });
 
-export { getOrCreateChat };
+const getUserChats = asyncHandler(async (req, res) => {
+  let chats = Chat.find({ users: { $elemMatch: { $eq: req.user?._id } } })
+    .populate("users", "-password -refreshToken")
+    .populate("groupAdmin", "-password -refreshToken")
+    .populate("latestMessage")
+    .sort({ updatedAt: -1 });
+
+  if (!chats || chats.length === 0) {
+    throw new ApiError(404, "No chats found for this user");
+  }
+
+  chats = await User.populate(chats, {
+    path: "latestMessage.sender",
+    select: "fullName email avatar",
+  });
+
+  if (!chats) {
+    throw new ApiError(500, "Something went wrong while fetching chats");
+  }
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, chats, "All Chat successfully fetched"));
+});
+
+export { getOrCreateChat, getUserChats };
