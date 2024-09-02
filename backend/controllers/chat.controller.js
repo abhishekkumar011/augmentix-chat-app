@@ -146,8 +146,12 @@ const renameGroupChatName = asyncHandler(async (req, res) => {
 
   const checkGroupChat = await Chat.findById(chatId);
 
-  if (!(checkGroupChat || checkGroupChat.isGroupChat)) {
-    throw new ApiError(400, "This is not a groupChat");
+  if (!checkGroupChat) {
+    throw new ApiError(404, "Chat not found");
+  }
+
+  if (!checkGroupChat.isGroupChat) {
+    throw new ApiError(400, "This is not a group chat");
   }
 
   if (checkGroupChat.groupAdmin.toString() !== req.user?._id.toString()) {
@@ -192,8 +196,12 @@ const addUserToGroup = asyncHandler(async (req, res) => {
 
   const checkGroupChat = await Chat.findById(chatId);
 
-  if (!(checkGroupChat || checkGroupChat.isGroupChat)) {
-    throw new ApiError(400, "This is not a groupChat");
+  if (!checkGroupChat) {
+    throw new ApiError(404, "Chat not found");
+  }
+
+  if (!checkGroupChat.isGroupChat) {
+    throw new ApiError(400, "This is not a group chat");
   }
 
   if (checkGroupChat.groupAdmin.toString() !== req.user?._id.toString()) {
@@ -229,10 +237,67 @@ const addUserToGroup = asyncHandler(async (req, res) => {
     );
 });
 
+const removeUserToGroup = asyncHandler(async (req, res) => {
+  const { userId, chatId } = req.body;
+
+  if ([userId, chatId].some((field) => field?.trim() === "")) {
+    throw new ApiError(400, "All fields are required");
+  }
+
+  const userValid = await User.findById(userId);
+
+  if (!userValid) {
+    throw new ApiError(400, "user does not exist");
+  }
+
+  const checkGroupChat = await Chat.findById(chatId);
+
+  if (!checkGroupChat) {
+    throw new ApiError(404, "Chat not found");
+  }
+
+  if (!checkGroupChat.isGroupChat) {
+    throw new ApiError(400, "This is not a group chat");
+  }
+
+  if (checkGroupChat.groupAdmin.toString() !== req.user?._id.toString()) {
+    throw new ApiError(404, "Only group admin can remove the user");
+  }
+
+  const isUserNotInGroup = checkGroupChat.users.some(
+    (user) => user._id.toString() !== userId
+  );
+
+  if (!isUserNotInGroup) {
+    throw new ApiError(400, "User is not in the group");
+  }
+
+  const removeUser = await Chat.findByIdAndUpdate(
+    chatId,
+    {
+      $pull: { users: userId },
+    },
+    { new: true }
+  )
+    .populate("users", "-passwrod -refreshToken")
+    .populate("groupAdmin", "-password -refreshToken");
+
+  if (!removeUser) {
+    throw new ApiError(500, "Something went wrong while adding the user");
+  }
+
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(200, removeUser, "User added to the group successfully")
+    );
+});
+
 export {
   getOrCreateChat,
   getUserChats,
   createGroupChat,
   renameGroupChatName,
   addUserToGroup,
+  removeUserToGroup,
 };
