@@ -137,4 +137,34 @@ const createGroupChat = asyncHandler(async (req, res) => {
     );
 });
 
-export { getOrCreateChat, getUserChats, createGroupChat };
+const renameGroupChatName = asyncHandler(async (req, res) => {
+  const { chatId, chatName } = req.body;
+
+  if ([chatId, chatName].some((field) => field?.trim() === "")) {
+    throw new ApiError(400, "All fields are required");
+  }
+
+  const updatedChat = await Chat.findByIdAndUpdate(
+    chatId,
+    {
+      chatName,
+    },
+    {
+      new: true,
+    }
+  )
+    .populate("users", "-passwrod -refreshToken")
+    .populate("groupAdmin", "-password -refreshToken");
+
+  if (!updatedChat) {
+    throw new ApiError(500, "Something went wrong while renaming the chat");
+  }
+
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(200, updatedChat, "ChatName is successfully Changed")
+    );
+});
+
+export { getOrCreateChat, getUserChats, createGroupChat, renameGroupChatName };
