@@ -167,7 +167,7 @@ const renameGroupChatName = asyncHandler(async (req, res) => {
       new: true,
     }
   )
-    .populate("users", "-passwrod -refreshToken")
+    .populate("users", "-password -refreshToken")
     .populate("groupAdmin", "-password -refreshToken");
 
   if (!updatedChat) {
@@ -223,7 +223,7 @@ const addUserToGroup = asyncHandler(async (req, res) => {
     },
     { new: true }
   )
-    .populate("users", "-passwrod -refreshToken")
+    .populate("users", "-password -refreshToken")
     .populate("groupAdmin", "-password -refreshToken");
 
   if (!addUser) {
@@ -279,7 +279,7 @@ const removeUserToGroup = asyncHandler(async (req, res) => {
     },
     { new: true }
   )
-    .populate("users", "-passwrod -refreshToken")
+    .populate("users", "-password -refreshToken")
     .populate("groupAdmin", "-password -refreshToken");
 
   if (!removeUser) {
