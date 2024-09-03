@@ -1,8 +1,8 @@
 import "./index.css";
 import App from "./App.tsx";
-import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { Login, Signup } from "./pages/index.ts";
+import { Chat, Login, Signup } from "./pages/index.ts";
+import { AuthProvider } from "./context/AuthProvider.tsx";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 
 const router = createBrowserRouter([
@@ -12,7 +12,7 @@ const router = createBrowserRouter([
     children: [
       {
         path: "/",
-        element: "",
+        element: <Login/>,
       },
       {
         path: "/login",
@@ -22,12 +22,16 @@ const router = createBrowserRouter([
         path: "/signup",
         element: <Signup />,
       },
+      {
+        path: "/chat/:id",
+        element: <Chat />,
+      },
     ],
   },
 ]);
 
 createRoot(document.getElementById("root")!).render(
-  <StrictMode>
+  <AuthProvider>
     <RouterProvider router={router} />
-  </StrictMode>
+  </AuthProvider>
 );

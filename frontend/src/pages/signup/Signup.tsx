@@ -166,7 +166,7 @@ const Signup = () => {
           </Button>
           <div className="flex gap-2">
             <span className="font-semibold">Already have an account?</span>
-            <Link to={"/login"}>Login</Link>
+            <Link to={"/"}>Login</Link>
           </div>
         </CardFooter>
       </Card>

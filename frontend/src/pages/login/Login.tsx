@@ -14,6 +14,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { useAuthContext } from "@/context/AuthContext";
 
 const Login = () => {
   const { toast } = useToast();
@@ -21,6 +22,7 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const {user} = useAuthContext();
 
   const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setEmail(e.target.value);
@@ -56,7 +58,7 @@ const Login = () => {
           description: "You successfully logged in",
           duration: 5000,
         });
-        navigate("/chat")
+        navigate(`/chat/${user.data.user._id}`)
       }
 
       setEmail("");

@@ -39,4 +39,14 @@ const sendMessage = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, message, "message created successfully"));
 });
 
-export { sendMessage };
+const getAllMessages = asyncHandler(async (req, res) => {
+  const message = await Message.find({ chat: req.params.chatId })
+    .populate("sender", "fullName email avatar")
+    .populate("chat");
+
+  return res
+    .status(201)
+    .json(new ApiResponse(200, message, "Message successfully Fetched"));
+});
+
+export { sendMessage, getAllMessages };

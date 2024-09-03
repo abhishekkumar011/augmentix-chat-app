@@ -5,7 +5,7 @@ import { AuthContextType } from "@/types";
 export const AuthProvider = ({ children }: any) => {
   const [user, setUser] = useState<any>(null);
   const [selectedChat, setSelectedChat] = useState();
-  const [chat, setChat] = useState<any>([]);
+  const [chats, setChats] = useState<any>([]);
   const [loading, setLoading] = useState<boolean>(false);
 
   useEffect(() => {
@@ -20,8 +20,8 @@ export const AuthProvider = ({ children }: any) => {
     setUser,
     selectedChat,
     setSelectedChat,
-    chat,
-    setChat,
+    chats,
+    setChats,
     loading,
     setLoading,
   };
